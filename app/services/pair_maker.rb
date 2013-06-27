@@ -18,6 +18,7 @@ class PairMaker
     while (@matching = do_matching rescue nil).nil?
       # Set users to nil so we reshuffle
       @users = nil
+      handle_odd_case
     end
 
     # Add a record for each of the matchings
