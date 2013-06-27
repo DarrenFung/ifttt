@@ -1,17 +1,16 @@
 # == Schema Information
 #
-# Table name: teams
+# Table name: pairings
 #
 #  id         :integer          not null, primary key
-#  name       :string(255)
+#  user1_id   :integer
+#  user2_id   :integer
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
 #
 
-require 'test_helper'
+require 'spec_helper'
 
-class TeamTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
+describe Pairing do
+  pending "add some examples to (or delete) #{__FILE__}"
 end

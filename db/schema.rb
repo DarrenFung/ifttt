@@ -11,7 +11,17 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130619172937) do
+ActiveRecord::Schema.define(:version => 20130627020600) do
+
+  create_table "pairings", :force => true do |t|
+    t.integer  "user1_id"
+    t.integer  "user2_id"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "pairings", ["user1_id"], :name => "index_pairings_on_user1_id"
+  add_index "pairings", ["user2_id"], :name => "index_pairings_on_user2_id"
 
   create_table "teams", :force => true do |t|
     t.string   "name"

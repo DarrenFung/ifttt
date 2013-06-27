@@ -12,9 +12,13 @@
 class User < ActiveRecord::Base
   attr_accessible :email, :name
 
-  has_and_belongs_to_many :teams, join_table: :user_teams
+  has_many :user_teams, class_name: 'UserTeams'
+  has_many :teams, through: :user_teams
+
+  has_many :pairings, dependent: :destroy, foreign_key: 'user1_id'
 
   validates :email,         presence: true,
-                            format: /\A[^@]+@([^@\.]+\.)+[^@\.]+\z/
+                            format: /\A[^@]+@([^@\.]+\.)+[^@\.]+\z/,
+                            uniqueness: true
 
 end
