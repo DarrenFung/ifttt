@@ -24,12 +24,13 @@ group :development do
   gem 'annotate', '~> 2.5.0'
   gem 'guard-rspec'
   gem 'debugger'
-  gem 'fabrication'
-  gem 'faker'
 end
 
 group :development, :test do
   gem 'rspec-rails', '~> 2.0'
+  gem 'fabrication'
+  gem 'faker'
+  gem 'mailcatcher'
 end
 
 gem 'jquery-rails'

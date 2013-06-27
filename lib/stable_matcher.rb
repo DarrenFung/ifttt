@@ -1,31 +1,4 @@
-# {1=>[3, 4, 2, 6, 5], 2=>[6, 5, 4, 1, 3], 3=>[2, 4, 5, 1, 6], 4=>[5, 2, 3, 6, 1], 5=>[3, 1, 2, 4, 6], 6=>[5, 1, 3, 4, 2]}
-
-# {1 => [8, 2 , 9 , 3 , 6 , 4 , 5 , 7 , 10], 2 => [4, 3, 8, 9, 5, 1, 10, 6, 7], 3 => [5, 6, 8, 2, 1, 7, 10, 4, 9], 4 => [10, 7, 9, 3, 1, 6, 2, 5, 8], 5 => [7, 4, 10, 8, 2, 6, 3, 1, 9], 6 => [2, 8, 7, 3, 4, 10, 1, 5, 9], 7 => [2, 1, 8, 3, 5, 10, 4, 6, 9], 8 => [10, 4, 2, 5, 6, 7, 1, 3, 9], 9 => [6, 7, 2, 5, 10, 3, 4, 8, 1], 10 => [3, 1, 6, 5, 2, 9, 8, 4, 7]}
-
-# {1 => [2,6,4,3,5], 2 => [3,5,1,6,4], 3 => [1,6,2,5,4], 4 => [5,2,3,6,1], 5 => [6,1,3,4,2], 6 => [4,2,5,1,3]}
-
-# {1 => [3,2,4], 2 => [4,3,1], 3 => [2,1,4], 4 => [1,3,2]}
-
-# {1 => [2,4,3,5,6], 2 => [5,1,6,3,4], 3 => [5,6,1,4,2], 4 => [2,6,5,1,3], 5 => [1,4,3,6,2], 6 => [5,4,3,2,1]}
-
 class StableMatcher
-
-  def self.generate_random_set(count)
-    raise unless count.even?
-
-    hash = {}
-
-    count.times do |c|
-      a = []
-      count.times { |t| a << (t+1) unless (t+1) == (c+1) }
-      1.upto(count) do |i|
-        j = rand(i + 1)
-        a[i], a[j] = a[j], a[i]
-      end
-      hash[c+1] = a.compact
-    end
-    hash
-  end
 
   attr_reader :matches
 
@@ -54,13 +27,18 @@ private
     while (rotation = find_rotation).size > 0 && !is_stable?
       apply_rotation(find_rotation)
     end
-
   end
 
+
+  #
+  # Finds a rotation on an initial proposal set
+  #
+  # @return [Array<Hash>] the rotation
   def find_rotation
     rotation = []
     @matches.each do |k,v|
       current_rotation = []
+      # If the current pair is already matched up, skip it
       next if is_matched?(k, v)
       current_proposer = k
 
@@ -69,11 +47,12 @@ private
         is_better_match?(val, get_proposer(val), current_proposer) == current_proposer
       }
 
-      # debugger
-
       # See if second favourite would reject their current proposal
       begin
+        # If we found a duplicate and it's not a valid rotation, then stop this traversal
         break if current_rotation.include?({current_proposer => current_fav})
+
+        # If we found a matched pair, then this is not a rotation
         break if is_matched?(current_proposer, @matches[current_proposer])
 
         current_rotation << {current_proposer => current_fav}
@@ -83,6 +62,7 @@ private
         }
       end while current_proposer != k
 
+      # If we ended up in the same place, then this is a valid rotation
       if current_proposer == k
         current_rotation.uniq!
         current_rotation.each do |r|
@@ -100,8 +80,7 @@ private
     rotation.each_with_index do |hash, i|
       @matches[hash.keys.first] = rotation[(i + 1) % rotation.size].values.first
 
-      # debugger
-
+      # Pop preferences off the list until we've reached the one that it got rotated to
       while @manipulated_preferences[hash.keys.first].include?(rotation[(i + 1) % rotation.size].values.first)
         @manipulated_preferences[hash.keys.first].shift
       end
@@ -164,7 +143,7 @@ private
   def handle_rejection(rejector, rejecting_for)
     rejected           = get_proposer(rejector)
 
-    # Now the rejected has to propose to next person
+    # Now the rejected has to propose to the next person
     propose_to rejected, @manipulated_preferences[rejected].shift
   end
 

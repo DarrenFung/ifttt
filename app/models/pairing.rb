@@ -15,5 +15,12 @@ class Pairing < ActiveRecord::Base
 
   attr_accessible :user1_id, :user2_id
 
-  # attr_accessible :title, :body
+  after_create :send_email
+
+private
+
+  def send_email
+    PairingsMailer.paired(self).deliver
+  end
+
 end
