@@ -1,9 +1,9 @@
-Free Responses:
+# Free Responses:
 
-Question 1:
+## Question 1:
 
 
-Project Notes:
+# Project Notes:
 
 To run the app, make sure you have Redis installed. The app expects Redis to be used on the default port, and the `redis-server` executable in the PATH.
 
