@@ -15,7 +15,10 @@ class PairMaker
     # First get all the teams including the users
     get_users
     handle_odd_case
-    @matching = do_matching
+    while (@matching = do_matching rescue nil).nil?
+      # Set users to nil so we reshuffle
+      @users = nil
+    end
 
     # Add a record for each of the matchings
     create_pairings
@@ -23,12 +26,6 @@ class PairMaker
   end
 
 private
-
-  # def is_stable?
-  #   return false if @matching.nil?
-  #   # Make sure no user is paired with their last pair
-  #   @matching.all? { |k,v| v != @user_paired_teammates[k].last }
-  # end
 
   def create_pairings
     Pairing.transaction do
@@ -64,7 +61,6 @@ private
       end
 
       @removed_user = User.find(user_to_remove)
-
     end
 
   end
@@ -81,20 +77,20 @@ private
       @user_nonpaired_teammates[u.id].delete u.id
 
       # Get the paired teammates
-      pairing_ids = $redis.zrangebyscore user_pairings(u.id), '-inf', '+inf'
-      pairing_ids = pairing_ids.map &:to_i
+      pairing_ids                     = $redis.zrangebyscore user_pairings(u.id), '-inf', '+inf'
+      pairing_ids                     = pairing_ids.map &:to_i
 
       # This should really only include teammates, intersect the sets
-      pairing_ids = pairing_ids & @user_nonpaired_teammates[u.id]
+      pairing_ids                     = pairing_ids & @user_nonpaired_teammates[u.id]
 
       # Remove the paired teammates from the non-paired teammates list
       @user_nonpaired_teammates[u.id] = @user_nonpaired_teammates[u.id] - pairing_ids
 
-      @user_paired_teammates[u.id] = pairing_ids
-      user_teammates = @user_nonpaired_teammates[u.id] + @user_paired_teammates[u.id]
+      @user_paired_teammates[u.id]    = pairing_ids
+      user_teammates                  = @user_nonpaired_teammates[u.id] + @user_paired_teammates[u.id]
 
       # Get the non-teammates
-      @user_non_teammates[u.id] = all_users - user_teammates.map(&:to_i) - [u.id]
+      @user_non_teammates[u.id]       = all_users - user_teammates.map(&:to_i) - [u.id]
     end
   end
 
