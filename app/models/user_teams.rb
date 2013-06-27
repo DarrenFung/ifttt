@@ -16,7 +16,7 @@ class UserTeams < ActiveRecord::Base
     team_ids = where(user_id: user).map &:team_id
     teams    = where(team_id: team_ids)
               .where(arel_table[:user_id].not_eq(user.id))
-              .joins(:user)
+              .includes(:user)
     teams.map(&:user).uniq
   end
 
@@ -24,7 +24,7 @@ class UserTeams < ActiveRecord::Base
     team_ids = where(user_id: user).map &:team_id
     teams    = where(arel_table[:team_id].not_in(team_ids))
               .where(arel_table[:user_id].not_eq(user.id))
-              .joins(:user)
+              .includes(:user)
     teams.map(&:user).uniq
   end
 

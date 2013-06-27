@@ -9,9 +9,11 @@ class PairMaker
     users = {}
 
     User.all.each do |u|
+      # Get all ther user's teammates
       users[u.id] = UserTeams.get_teammates(u).map &:id
 
-      pairing_ids = Pairing.where(user1_id: u).order('created_at DESC').select(:user2_id).select('MAX(created_at) as created_at').uniq.group('user2_id').map &:user2_id
+      # Get the
+      pairing_ids = Pairing.where(user1_id: u).order('created_at DESC').select(:user2_id).select('MAX(created_at) as created_at').uniq.group('user2_id').includes(:user2).map &:user2_id
 
       stack = []
       pairing_ids.each { |id|
@@ -32,8 +34,11 @@ class PairMaker
     matcher.start
 
     # Add a record for each of the matchings
-    matcher.matches.each do |k,v|
-      Pairing.create(user1_id: k, user2_id: v)
+
+    Pairing.transaction do
+      matcher.matches.each do |k,v|
+        Pairing.create(user1_id: k, user2_id: v)
+      end
     end
 
   end
