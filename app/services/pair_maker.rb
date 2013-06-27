@@ -45,6 +45,7 @@ private
     return @users unless @users.nil?
     @users = {}
     User.select(:id).all.each do |u|
+      next if u.teams.count == 0
       @users[u.id] = @user_nonpaired_teammates[u.id].shuffle + @user_paired_teammates[u.id] + @user_non_teammates[u.id].shuffle
     end
     @users
@@ -54,13 +55,14 @@ private
 
     if users.size.odd?
       # We can't have an odd pair... so find someone to remove
-      user_to_remove = Random.rand(users.size) + 1
-      users.delete(user_to_remove)
+      user_to_remove = Random.rand(users.size)
+      user_id = users.keys[user_to_remove]
+      users.delete(user_id)
       users.each do |k,v|
-        v.delete(user_to_remove)
+        v.delete(user_id)
       end
 
-      @removed_user = User.find(user_to_remove)
+      @removed_user = User.find(user_id)
     end
 
   end
@@ -68,13 +70,23 @@ private
   def get_users
     all_users = User.select(:id).all.map &:id
     User.includes(:user_teams).select(:id).each do |u|
+
+      if u.teams.count == 0
+        all_users.delete u.id
+        next
+      end
+
       # Get the user's teams
       team_ids  = u.user_teams.map &:team_id
       team_keys = team_ids.map { |t| team_users(t) }
 
       # Get the teammates and assume they're non paired
-      @user_nonpaired_teammates[u.id] = $redis.sunion(team_keys).map &:to_i
-      @user_nonpaired_teammates[u.id].delete u.id
+      if team_keys.empty?
+        @user_nonpaired_teammates[u.id] = []
+      else
+        @user_nonpaired_teammates[u.id] = $redis.sunion(team_keys).map &:to_i
+        @user_nonpaired_teammates[u.id].delete u.id
+      end
 
       # Get the paired teammates
       pairing_ids                     = $redis.zrangebyscore user_pairings(u.id), '-inf', '+inf'

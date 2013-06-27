@@ -1,10 +1,14 @@
-<p id="notice"><%= notice %></p>
-
 <p>
   <b>Name:</b>
   <%= @team.name %>
 </p>
 
+<h3>Users</h3>
+<ul class="js-users">
+  <% @team.users.each do |user| %>
+    <li><%= user.name %></li>
+  <% end %>
+</ul>
 
 <%= link_to 'Edit', edit_team_path(@team) %> |
 <%= link_to 'Back', teams_path %>

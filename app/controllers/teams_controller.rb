@@ -41,6 +41,7 @@ class TeamsController < ApplicationController
   # POST /teams.json
   def create
     @team = Team.new(params[:team])
+    @team.users = User.where(id: params[:users])
 
     respond_to do |format|
       if @team.save
@@ -57,6 +58,7 @@ class TeamsController < ApplicationController
   # PUT /teams/1.json
   def update
     @team = Team.find(params[:id])
+    @team.users = User.where(id: params[:users])
 
     respond_to do |format|
       if @team.update_attributes(params[:team])

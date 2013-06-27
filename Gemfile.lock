@@ -73,6 +73,10 @@ GEM
       rspec (~> 2.13)
     haml (4.0.3)
       tilt
+    handlebars_assets (0.14.1)
+      execjs (>= 1.2.9)
+      sprockets (>= 2.0.3)
+      tilt
     hike (1.2.3)
     hiredis (0.4.5)
     i18n (0.6.1)
@@ -182,6 +186,11 @@ GEM
     treetop (1.4.14)
       polyglot
       polyglot (>= 0.3.1)
+    twitter-bootstrap-rails (2.2.7)
+      actionpack (>= 3.1)
+      execjs
+      rails (>= 3.1)
+      railties (>= 3.1)
     tzinfo (0.3.37)
     uglifier (2.1.1)
       execjs (>= 0.3.0)
@@ -198,6 +207,7 @@ DEPENDENCIES
   faker
   foreman
   guard-rspec
+  handlebars_assets
   hiredis (~> 0.4.5)
   jquery-rails
   mailcatcher
@@ -206,4 +216,5 @@ DEPENDENCIES
   rspec-rails (~> 2.0)
   sass-rails (~> 3.2.3)
   sqlite3
+  twitter-bootstrap-rails
   uglifier (>= 1.0.3)

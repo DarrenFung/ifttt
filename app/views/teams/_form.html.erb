@@ -1,3 +1,7 @@
+<%= javascript_tag do %>
+  users = <%=raw User.all.to_json(only: [:id, :name]) %>
+<% end %>
+
 <%= form_for(@team) do |f| %>
   <% if @team.errors.any? %>
     <div id="error_explanation">
@@ -11,11 +15,29 @@
     </div>
   <% end %>
 
-  <div class="field">
-    <%= f.label :name %><br />
-    <%= f.text_field :name %>
+  <fieldset>
+    <div class="field">
+      <%= f.label :name %><br />
+      <%= f.text_field :name %>
+    </div>
+  </fieldset>
+
+  <ul class="js-users">
+    <% @team.users.each do |user| %>
+      <li>
+        <%= user.name %>
+        <input id="users_" name="users[]" type="hidden" value="<%= user.id %>" />
+        <a href="#" class="js-remove"><i class="icon-remove"></i></a>
+      </li>
+    <% end %>
+  </ul>
+
+  <div>
+    <h3>Add user to team<h3/>
+    <%= text_field_tag 'add-user', '', class: 'js-users', placeholder: 'User Name' %>
   </div>
+
   <div class="actions">
-    <%= f.submit %>
+    <%= f.submit class: 'btn' %>
   </div>
 <% end %>

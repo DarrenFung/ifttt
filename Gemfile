@@ -22,6 +22,8 @@ end
 
 gem 'redis', '~> 3.0.1'
 gem 'hiredis', '~> 0.4.5'
+gem "twitter-bootstrap-rails"
+gem 'handlebars_assets'
 
 group :development do
   gem 'annotate', '~> 2.5.0'
