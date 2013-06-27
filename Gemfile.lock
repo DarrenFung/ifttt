@@ -49,6 +49,7 @@ GEM
     debugger-linecache (1.2.0)
     debugger-ruby_core_source (1.2.2)
     diff-lcs (1.2.4)
+    dotenv (0.8.0)
     erubis (2.7.0)
     eventmachine (1.0.3)
     execjs (1.4.0)
@@ -57,6 +58,9 @@ GEM
     faker (1.1.2)
       i18n (~> 0.5)
     ffi (1.9.0)
+    foreman (0.63.0)
+      dotenv (>= 0.7)
+      thor (>= 0.13.6)
     formatador (0.2.4)
     guard (1.8.1)
       formatador (>= 0.2.4)
@@ -70,6 +74,7 @@ GEM
     haml (4.0.3)
       tilt
     hike (1.2.3)
+    hiredis (0.4.5)
     i18n (0.6.1)
     journey (1.0.4)
     jquery-rails (3.0.1)
@@ -133,6 +138,7 @@ GEM
       ffi (>= 0.5.0)
     rdoc (3.12.2)
       json (~> 1.4)
+    redis (3.0.4)
     rspec (2.13.0)
       rspec-core (~> 2.13.0)
       rspec-expectations (~> 2.13.0)
@@ -190,10 +196,13 @@ DEPENDENCIES
   debugger
   fabrication
   faker
+  foreman
   guard-rspec
+  hiredis (~> 0.4.5)
   jquery-rails
   mailcatcher
   rails (= 3.2.13)
+  redis (~> 3.0.1)
   rspec-rails (~> 2.0)
   sass-rails (~> 3.2.3)
   sqlite3

@@ -1,11 +1,13 @@
 require 'stable_matcher'
+require 'redis_key_manager'
 
 class PairMaker
+  include RedisKeyManager
 
   def initialize
-    @users              = {}
-    @user_teammates     = {}
-    @user_non_teammates = {}
+    @user_nonpaired_teammates = {}
+    @user_paired_teammates    = {}
+    @user_non_teammates       = {}
   end
 
   def get_pairs
@@ -13,35 +15,51 @@ class PairMaker
     # First get all the teams including the users
     get_users
     handle_odd_case
-    matching = do_matching
+    @matching = do_matching
 
     # Add a record for each of the matchings
-    create_pairings(matching)
+    create_pairings
+    @matching
   end
 
 private
 
-  def create_pairings(matching)
+  # def is_stable?
+  #   return false if @matching.nil?
+  #   # Make sure no user is paired with their last pair
+  #   @matching.all? { |k,v| v != @user_paired_teammates[k].last }
+  # end
+
+  def create_pairings
     Pairing.transaction do
-      matching.each do |k,v|
+      @matching.each do |k,v|
         Pairing.create(user1_id: k, user2_id: v)
       end
     end
-    PairingsMailer.odd_pairing(@removed_user)
+    PairingsMailer.odd_pairing(@removed_user) unless @removed_user.nil?
   end
 
   def do_matching
-    matcher = ::StableMatcher.new @users
+    matcher = ::StableMatcher.new users
     matcher.start
+  end
+
+  def users
+    return @users unless @users.nil?
+    @users = {}
+    User.select(:id).all.each do |u|
+      @users[u.id] = @user_nonpaired_teammates[u.id].shuffle + @user_paired_teammates[u.id] + @user_non_teammates[u.id].shuffle
+    end
+    @users
   end
 
   def handle_odd_case
 
-    if @users.size.odd?
+    if users.size.odd?
       # We can't have an odd pair... so find someone to remove
-      user_to_remove = Random.rand(@users.size) + 1
-      @users.delete(user_to_remove)
-      @users.each do |k,v|
+      user_to_remove = Random.rand(users.size) + 1
+      users.delete(user_to_remove)
+      users.each do |k,v|
         v.delete(user_to_remove)
       end
 
@@ -52,31 +70,31 @@ private
   end
 
   def get_users
-    User.all.each do |u|
-      # Get all ther user's teammates
-      @users[u.id] = UserTeams.get_teammates(u).map &:id
+    all_users = User.select(:id).all.map &:id
+    User.includes(:user_teams).select(:id).each do |u|
+      # Get the user's teams
+      team_ids  = u.user_teams.map &:team_id
+      team_keys = team_ids.map { |t| team_users(t) }
 
-      # Get the
-      pairing_ids = Pairing.where(user1_id: u).order('created_at DESC').select(:user2_id).select('MAX(created_at) as created_at').uniq.group('user2_id').includes(:user2).map &:user2_id
+      # Get the teammates and assume they're non paired
+      @user_nonpaired_teammates[u.id] = $redis.sunion(team_keys).map &:to_i
+      @user_nonpaired_teammates[u.id].delete u.id
 
-      stack = []
-      pairing_ids.each { |id|
-        stack.unshift(id)
-        @users[u.id].delete id
-      }
+      # Get the paired teammates
+      pairing_ids = $redis.zrangebyscore user_pairings(u.id), '-inf', '+inf'
+      pairing_ids = pairing_ids.map &:to_i
 
-      # Before we put the stack in, randomize the set
-      @users[u.id].shuffle!
-      @users[u.id].push *stack
+      # This should really only include teammates, intersect the sets
+      pairing_ids = pairing_ids & @user_nonpaired_teammates[u.id]
 
-      # Save this so we can randomize the right part later
-      @user_teammates[u.id] = @users[u.id]
+      # Remove the paired teammates from the non-paired teammates list
+      @user_nonpaired_teammates[u.id] = @user_nonpaired_teammates[u.id] - pairing_ids
 
-      @user_non_teammates[u.id] = UserTeams.get_nonteammates(u)
-      puts u.id
-      @user_non_teammates[u.id].each do |uu|
-        @users[u.id].push(uu.id) unless @users[u.id].include?(uu.id)
-      end
+      @user_paired_teammates[u.id] = pairing_ids
+      user_teammates = @user_nonpaired_teammates[u.id] + @user_paired_teammates[u.id]
+
+      # Get the non-teammates
+      @user_non_teammates[u.id] = all_users - user_teammates.map(&:to_i) - [u.id]
     end
   end
 

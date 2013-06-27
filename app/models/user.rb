@@ -8,8 +8,11 @@
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
 #
+require 'redis_key_manager'
 
 class User < ActiveRecord::Base
+  include RedisKeyManager
+
   attr_accessible :email, :name
 
   has_many :user_teams, class_name: 'UserTeams', dependent: :destroy
@@ -20,5 +23,14 @@ class User < ActiveRecord::Base
   validates :email,         presence: true,
                             format: /\A[^@]+@([^@\.]+\.)+[^@\.]+\z/,
                             uniqueness: true
+
+  before_destroy :delete_pairings_redis
+
+private
+
+  def delete_pairings_redis
+    $redis.del user_pairings(id)
+    $redis.del user_non_paired_teammates(id)
+  end
 
 end

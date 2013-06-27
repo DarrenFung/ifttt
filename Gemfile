@@ -20,10 +20,14 @@ group :assets do
   gem 'uglifier', '>= 1.0.3'
 end
 
+gem 'redis', '~> 3.0.1'
+gem 'hiredis', '~> 0.4.5'
+
 group :development do
   gem 'annotate', '~> 2.5.0'
   gem 'guard-rspec'
   gem 'debugger'
+  gem 'foreman'
 end
 
 group :development, :test do
