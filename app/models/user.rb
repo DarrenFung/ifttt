@@ -31,6 +31,11 @@ private
   def delete_pairings_redis
     $redis.del user_pairings(id)
     $redis.del user_non_paired_teammates(id)
+
+    # Go over all the pairings and delete myself from their lists
+    pairings.select(:user2_id).uniq.each do |pairing|
+      $redis.zrem user_pairings(pairing.user2_id), self.id
+    end
   end
 
 end
