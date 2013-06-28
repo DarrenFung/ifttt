@@ -15,6 +15,7 @@ class PairMaker
     # First get all the teams including the users
     get_users
     handle_odd_case
+
     while (@matching = do_matching rescue nil).nil?
       # Set users to nil so we reshuffle
       @users = nil
@@ -45,9 +46,14 @@ private
   def users
     return @users unless @users.nil?
     @users = {}
+    all_users = User.select(:id).all.map &:id
     User.select(:id).all.each do |u|
       next if u.teams.count == 0
+      debugger if u.id == 117
       @users[u.id] = @user_nonpaired_teammates[u.id].shuffle + @user_paired_teammates[u.id] + @user_non_teammates[u.id].shuffle
+
+      # Remove non existant users
+      @users[u.id] = @users[u.id] & all_users
     end
     @users
   end
@@ -72,6 +78,7 @@ private
     all_users = User.select(:id).all.map &:id
     User.includes(:user_teams).select(:id).each do |u|
 
+      debugger if u.id == 117
       if u.teams.count == 0
         all_users.delete u.id
         next
