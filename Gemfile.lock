@@ -28,6 +28,7 @@ GEM
     activesupport (3.2.13)
       i18n (= 0.6.1)
       multi_json (~> 1.0)
+    addressable (2.3.5)
     annotate (2.5.0)
       rake
     arel (3.0.2)
@@ -51,6 +52,9 @@ GEM
     debugger-ruby_core_source (1.2.2)
     diff-lcs (1.2.4)
     dotenv (0.8.0)
+    email_spec (1.4.0)
+      launchy (~> 2.1)
+      mail (~> 2.2)
     erubis (2.7.0)
     eventmachine (1.0.3)
     execjs (1.4.0)
@@ -86,6 +90,8 @@ GEM
       railties (>= 3.0, < 5.0)
       thor (>= 0.14, < 2.0)
     json (1.8.0)
+    launchy (2.3.0)
+      addressable (~> 2.3)
     listen (1.2.2)
       rb-fsevent (>= 0.9.3)
       rb-inotify (>= 0.9)
@@ -105,6 +111,7 @@ GEM
       thin (~> 1.5.0)
     method_source (0.8.1)
     mime-types (1.23)
+    mock_redis (0.8.1)
     multi_json (1.7.7)
     polyglot (0.3.3)
     pry (0.9.12.2)
@@ -207,6 +214,7 @@ DEPENDENCIES
   annotate (~> 2.5.0)
   coffee-rails (~> 3.2.1)
   debugger
+  email_spec
   fabrication
   faker
   foreman
@@ -215,6 +223,7 @@ DEPENDENCIES
   hiredis (~> 0.4.5)
   jquery-rails
   mailcatcher
+  mock_redis
   rails (= 3.2.13)
   redis (~> 3.0.1)
   rspec-rails (~> 2.0)

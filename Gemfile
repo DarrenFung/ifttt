@@ -40,6 +40,11 @@ group :development, :test do
   gem 'mailcatcher'
 end
 
+group :test do
+  gem 'email_spec'
+  gem 'mock_redis'
+end
+
 gem 'jquery-rails'
 
 # To use ActiveModel has_secure_password

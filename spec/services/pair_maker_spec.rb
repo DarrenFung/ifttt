@@ -1,23 +1,165 @@
 require 'spec_helper'
+require 'ruby-debug'
 
 describe PairMaker do
 
-  describe '.initialize' do
+  let(:pairmaker) { PairMaker.new }
 
-    context 'when odd number of users' do
-      it 'raises an error' do
-        expect {
-          PairMaker.new '1' => [2, 3, 4], '2' => [3, 1], '3' => [1, 2, 4], '4' => [1, 2, 3]
-        }.to raise_error
+  describe '#get_pairs' do
+
+    subject { pairmaker.get_pairs }
+
+    context "when one team exists" do
+
+      let(:team) { Fabricate :team }
+
+      before :each do
+        team.users = users
       end
+
+      context "and there are an even number of people on the team" do
+
+        let(:users) do
+          Array.new(4) { Fabricate :user }
+        end
+
+        it 'makes 4 pairings' do
+          subject
+          Pairing.count.should eq(4)
+        end
+
+        context "and a previous pairing was done" do
+
+          before :each do
+            PairMaker.new.get_pairs
+          end
+
+          it "doesn't create a pairing with the same people" do
+            subject
+            debugger
+            user_pairs = {}
+            Pairing.all.each { |p|
+              user_pairs[p.user1] ||= {}
+              unless user_pairs[p.user1].has_key?(p.user2)
+                user_pairs[p.user1][p.user2] = 0
+              end
+              user_pairs[p.user1][p.user2] += 1
+            }
+            user_pairs.values.all? { |h| h.values.all? { |v| v == 1 } }.should be_true
+
+          end
+
+        end
+
+      end
+
+      context "and there is an odd number of people on the team" do
+        let(:users) do
+          Array.new(3) { Fabricate :user }
+        end
+
+        it 'makes 2 pairings' do
+          subject
+          Pairing.count.should eq(2)
+        end
+
+        context "and a previous pairing was done" do
+
+          before :each do
+            pairmaker.get_pairs
+          end
+
+          it "doesn't create a pairing with the same people" do
+            subject
+            user_pairs = {}
+            Pairing.all.each { |p|
+              user_pairs[p.user1] ||= {}
+              unless user_pairs[p.user1].has_key?(p.user2)
+                user_pairs[p.user1][p.user2] = 0
+              end
+              user_pairs[p.user1][p.user2] += 1
+            }
+            user_pairs.values.all? { |h| h.values.all? { |v| v == 1 } }.should be_true
+
+          end
+
+        end
+
+      end
+
     end
 
-    context "when one array doesn't have the right size" do
-      it 'raises an error' do
-        expect {
-          PairMaker.new '1' => [2, 3], '2' => [3, 1], '3' => [1, 2]
-        }.to raise_error
+    context "when two teams exist" do
+
+      let(:teams) { Array.new(2) { Fabricate :team } }
+
+      before(:each) do
+        teams[0].users = team1_users
+        teams[1].users = team2_users
       end
+
+      context "and there's an even number on both teams" do
+
+        let(:team1_users) {
+          Array.new(4) { Fabricate :user }
+        }
+        let(:team2_users) {
+          Array.new(6) { Fabricate :user }
+        }
+
+        it "creates 10 pairings" do
+          subject
+          Pairing.count.should eq(10)
+        end
+
+        describe "the pairings" do
+
+          it "are of the same team" do
+            Pairing.all.each do |p|
+              p.user1.teams.should eq(p.user2.teams)
+            end
+          end
+
+        end
+
+      end
+
+      context "and there's an odd number on both teams" do
+
+        let(:team1_users) {
+          Array.new(3) { Fabricate :user }
+        }
+        let(:team2_users) {
+          Array.new(5) { Fabricate :user }
+        }
+
+        it "creates 8 pairings" do
+          subject
+          Pairing.count.should eq(8)
+        end
+
+        it "creates a pairing that crosses teams" do
+          subject
+          Pairing.all.detect{ |p| p.user1.teams != p.user2.teams }.should be
+        end
+
+      end
+
+      context "and there's an even number on one team and odd on the other" do
+        let(:team1_users) {
+          Array.new(3) { Fabricate :user }
+        }
+        let(:team2_users) {
+          Array.new(6) { Fabricate :user }
+        }
+
+        it "creates 8 pairings" do
+          subject
+          Pairing.count.should eq(8)
+        end
+
+      end
+
     end
 
   end
