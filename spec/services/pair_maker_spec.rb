@@ -28,29 +28,6 @@ describe PairMaker do
           Pairing.count.should eq(4)
         end
 
-        context "and a previous pairing was done" do
-
-          before :each do
-            PairMaker.new.get_pairs
-          end
-
-          it "doesn't create a pairing with the same people" do
-            subject
-            debugger
-            user_pairs = {}
-            Pairing.all.each { |p|
-              user_pairs[p.user1] ||= {}
-              unless user_pairs[p.user1].has_key?(p.user2)
-                user_pairs[p.user1][p.user2] = 0
-              end
-              user_pairs[p.user1][p.user2] += 1
-            }
-            user_pairs.values.all? { |h| h.values.all? { |v| v == 1 } }.should be_true
-
-          end
-
-        end
-
       end
 
       context "and there is an odd number of people on the team" do
@@ -61,28 +38,6 @@ describe PairMaker do
         it 'makes 2 pairings' do
           subject
           Pairing.count.should eq(2)
-        end
-
-        context "and a previous pairing was done" do
-
-          before :each do
-            pairmaker.get_pairs
-          end
-
-          it "doesn't create a pairing with the same people" do
-            subject
-            user_pairs = {}
-            Pairing.all.each { |p|
-              user_pairs[p.user1] ||= {}
-              unless user_pairs[p.user1].has_key?(p.user2)
-                user_pairs[p.user1][p.user2] = 0
-              end
-              user_pairs[p.user1][p.user2] += 1
-            }
-            user_pairs.values.all? { |h| h.values.all? { |v| v == 1 } }.should be_true
-
-          end
-
         end
 
       end
