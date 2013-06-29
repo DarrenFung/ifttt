@@ -15,14 +15,7 @@ class PairMaker
 
     # First get all the teams including the users
     get_users
-    handle_odd_case
-
-    while (@matching = do_matching rescue nil).nil?
-      # Set users to nil so we reshuffle
-      @users = nil
-      handle_odd_case
-    end
-
+    do_matching
     # Add a record for each of the matchings
     create_pairings
     @matching
@@ -42,8 +35,17 @@ private
   end
 
   def do_matching
-    matcher = ::StableMatcher.new users
-    matcher.start
+
+    while true
+      begin
+        handle_odd_case
+        matcher   = ::StableMatcher.new users
+        @matching = matcher.start
+        break
+      rescue ::StableMatcher::NoSolutionError
+        @users = nil
+      end
+    end
   end
 
   def users
