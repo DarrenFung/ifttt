@@ -6,7 +6,7 @@ If I had my bills paid for a year, I would like to experiment with two different
 
 My second project would be something mobile. I've only had a little experience with iOS and Android, and I'd like to immerse myself into the mobile app development world and see what I can come up with. A project I had in mind would be an easy way for people to organize poker games (think boys night), as I always saw the problem of people not having enough cash for a cash game because poker games are usually spontaneous affairs.
 
-Question 2:
+## Question 2:
 
 A non programming project that I would like to do is work on my photography. Hiking is one of my favourite hobbies, and I'd love to combine photography and hiking to compile photos of the best hiking spots in the world.
 
