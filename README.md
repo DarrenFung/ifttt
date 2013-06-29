@@ -14,9 +14,11 @@ As well, if I had a house or condo or apartment, a project that I would like to 
 
 # Project Notes:
 
+## Starting the App
+
 Dependencies:
-SQLite
-Redis
+1. SQLite
+2. Redis
 
 The app expects Redis to be used on the default port, and the `redis-server` executable in the PATH.
 
@@ -36,3 +38,18 @@ rake db:seed
 ```
 
 Then, start the app: `foreman start -f Procfile`
+
+The app is set up to send the emails every Friday at 5:00pm, but if you want to manually send them, enter the Rails console `rails c`, and then type `PairMaker.new.get_pairs`
+
+## Design Decisions:
+
+I chose to use Redis as my app does a lot of set and list manipulations. As the primary data store, I use SQLite for its simplicity.
+
+I made some assumptions about the constraints. They're meant to follow how I would pair up people in the same scenario. For example, if we have two teams with an odd number of team members, I wouldn't want the two non-teammates to be alone for the week. Thus, in scenarios like that, the non-teammates will be paired up so as to more closely follow constraint #1 (Every person in the organization should participate in a 1+1 pair each week.).
+
+
+## Testing
+
+The service that creates the pairing is tested with RSpec. I did not see a reason to test the front end, as it was mainly Rails scaffolding with a bit of Bootstrap fluff.
+
+As well, a bit of manual testing was done at a glance to see that the service works.
