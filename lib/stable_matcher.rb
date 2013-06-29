@@ -1,5 +1,7 @@
 class StableMatcher
 
+  class NoSolutionError < StandardError; end
+
   attr_reader :matches
 
   # Expects preference_hash to be of format: { userId: [user_preferences] }
@@ -18,7 +20,7 @@ class StableMatcher
 
     @matches
   rescue
-    raise "Not solvable"
+    raise NoSolutionError, "Not solvable"
   end
 
 private
@@ -178,11 +180,11 @@ private
   def check_input
     # Make sure the preference sizes all match
     unless @preferences.all? { |k,v| v.size == size - 1 }
-      raise 'All arrays must have same size!'
+      raise ArgumentError, 'All arrays must have same size!'
     end
 
     # Ensure there's an even number of people
-    raise "Must have even number of people" unless size.even?
+    raise ArgumentError, "Must have even number of people" unless size.even?
 
   end
 
