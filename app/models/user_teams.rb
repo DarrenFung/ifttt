@@ -19,22 +19,6 @@ class UserTeams < ActiveRecord::Base
   after_create :add_to_non_paired
   before_destroy :remove_from_team_members
 
-  def self.get_teammates(user)
-    team_ids = where(user_id: user).map &:team_id
-    teams    = where(team_id: team_ids)
-              .where(arel_table[:user_id].not_eq(user.id))
-              .includes(:user)
-    teams.map(&:user).uniq
-  end
-
-  def self.get_nonteammates(user)
-    team_ids = where(user_id: user).map &:team_id
-    teams    = where(arel_table[:team_id].not_in(team_ids))
-              .where(arel_table[:user_id].not_eq(user.id))
-              .includes(:user)
-    teams.map(&:user).uniq
-  end
-
 private
 
   def add_to_team_members
